@@ -1,63 +1,109 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
-	"time"
+	"net/http"
 	"sync"
+	"time"
 )
-type Motor struct{
-	ID int
-	Temperature float64
-	Vibration float64
-	RPM int
+
+// Motor defines the digital twin structure
+type Motor struct {
+	ID          int     `json:"id"`
+	Temperature float64 `json:"temperature"`
+	Vibration   float64 `json:"vibration"`
+	RPM         int     `json:"rpm"`
 }
-func simulateMotor(motor Motor, wg *sync.WaitGroup){
-	defer wg.Done();
-	for{
-		tempNoise := rand.Float64()*2-1
+
+// Global state
+var (
+	motors = make(map[int]*Motor)
+	mutex  = sync.RWMutex{} // Using RWMutex for better performance on reads
+)
+
+func simulateMotor(motor *Motor) {
+	for {
+		mutex.Lock()
+		// Simulate natural temperature drift
+		tempNoise := rand.Float64()*2 - 1
 		motor.Temperature += tempNoise
-		if (motor.Temperature <40){
-			motor.Temperature =40
+
+		// Keep values within realistic bounds
+		if motor.Temperature < 40 {
+			motor.Temperature = 40
 		}
-		if(motor.Temperature>80){
-			motor.Temperature=80
+		if motor.Temperature > 80 {
+			motor.Temperature = 80
 		}
-		motor.Vibration+=rand.Float64()*0.2-0.1
-		if(motor.Temperature >75){
-			motor.Vibration+=0.5
+
+		// Vibration increases if temperature is high
+		motor.Vibration += rand.Float64()*0.2 - 0.1
+		if motor.Temperature > 75 {
+			motor.Vibration += 0.5
 		}
-		if(motor.Vibration<0){
-			motor.Vibration=0;
+		if motor.Vibration < 0 {
+			motor.Vibration = 0
 		}
-		motor.RPM=900+ rand.Intn(600)
-		fmt.Printf(
-			"[Motor %d] Temp:%.2f°C | Vib:%.2f |RPM:%d\n",
-			motor.ID,
-			motor.Temperature,
-			motor.Vibration,
-			motor.RPM,
-		)
-		time.Sleep(1*time.Second)
+
+		// RPM fluctuates slightly around a base
+		motor.RPM = 1100 + rand.Intn(400)
+		mutex.Unlock()
+
+		// Log to console so we know it's running
+		fmt.Printf("[Motor %d] Temp: %.2f°C | Vib: %.2f | RPM: %d\n",
+			motor.ID, motor.Temperature, motor.Vibration, motor.RPM)
+
+		time.Sleep(1 * time.Second)
 	}
 }
+
+// --- API Handlers ---
+
+// Root handler to confirm server is up
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html")
+	fmt.Fprint(w, "<h1>Digital Twin API is running</h1><p>Check <a href='/status'>/status</a> for data.</p>")
+}
+
+// Status handler to return JSON of all motors
+func statusHandler(w http.ResponseWriter, r *http.Request) {
+	mutex.RLock() // Lock for reading
+	defer mutex.RUnlock()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(motors)
+}
+
 func main() {
+	// Seed random number generator
 	rand.Seed(time.Now().UnixNano())
-
-	var wg sync.WaitGroup
-	numberOfMotors := 10
-
-	for i := 1; i <= numberOfMotors; i++ {
-		motor := Motor{
+	
+	// Initialize and start 5 motor twins
+	for i := 1; i <= 10; i++ {
+		m := &Motor{
 			ID:          i,
 			Temperature: 60.0,
 			Vibration:   1.0,
 			RPM:         1200,
 		}
-
-		wg.Add(1)
-		go simulateMotor(motor, &wg)
+		motors[i] = m
+		go simulateMotor(m) // Run each motor in its own goroutine
 	}
 
-	wg.Wait()
+	// Route definitions
+	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/status", statusHandler)
+
+	fmt.Println("----------------------------------------------")
+	fmt.Println("Digital Twin Server starting on http://localhost:8080")
+	fmt.Println("Access http://localhost:8080/status to see data")
+	fmt.Println("----------------------------------------------")
+
+	// Start the server (this is a blocking call)
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		fmt.Printf("Could not start server: %s\n", err)
+	}
 }
