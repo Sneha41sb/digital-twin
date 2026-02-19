@@ -15,6 +15,8 @@ type Motor struct {
 	Temperature float64 `json:"temperature"`
 	Vibration   float64 `json:"vibration"`
 	RPM         int     `json:"rpm"`
+	TempHistory []float64 `json:"tempHistory"`
+	RPMHistory  []int     `json:"rpmHistory"`
 }
 
 // Global state
@@ -25,12 +27,13 @@ var (
 
 func simulateMotor(motor *Motor) {
 	for {
+
 		mutex.Lock()
+
 		// Simulate natural temperature drift
 		tempNoise := rand.Float64()*2 - 1
 		motor.Temperature += tempNoise
 
-		// Keep values within realistic bounds
 		if motor.Temperature < 40 {
 			motor.Temperature = 40
 		}
@@ -38,7 +41,7 @@ func simulateMotor(motor *Motor) {
 			motor.Temperature = 80
 		}
 
-		// Vibration increases if temperature is high
+		// Vibration simulation
 		motor.Vibration += rand.Float64()*0.2 - 0.1
 		if motor.Temperature > 75 {
 			motor.Vibration += 0.5
@@ -47,17 +50,31 @@ func simulateMotor(motor *Motor) {
 			motor.Vibration = 0
 		}
 
-		// RPM fluctuates slightly around a base
+		// RPM simulation
 		motor.RPM = 1100 + rand.Intn(400)
+
+		// Store history AFTER updating state
+		motor.TempHistory = append(motor.TempHistory, motor.Temperature)
+		motor.RPMHistory = append(motor.RPMHistory, motor.RPM)
+
+		// Keep only last 20 points
+		if len(motor.TempHistory) > 20 {
+			motor.TempHistory = motor.TempHistory[1:]
+		}
+
+		if len(motor.RPMHistory) > 20 {
+			motor.RPMHistory = motor.RPMHistory[1:]
+		}
+
 		mutex.Unlock()
 
-		// Log to console so we know it's running
 		fmt.Printf("[Motor %d] Temp: %.2f°C | Vib: %.2f | RPM: %d\n",
 			motor.ID, motor.Temperature, motor.Vibration, motor.RPM)
 
 		time.Sleep(1 * time.Second)
 	}
 }
+
 
 // --- API Handlers ---
 
@@ -69,12 +86,16 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 
 // Status handler to return JSON of all motors
 func statusHandler(w http.ResponseWriter, r *http.Request) {
-	mutex.RLock() // Lock for reading
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+
+	mutex.RLock()
 	defer mutex.RUnlock()
 
-	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(motors)
 }
+
 
 func main() {
 	// Seed random number generator
