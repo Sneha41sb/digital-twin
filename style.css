@@ -1,98 +1,114 @@
+:root {
+    --bg-dark: #020617;
+    --card-bg: rgba(30, 41, 59, 0.7);
+    --accent-blue: #38bdf8;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --critical: #ef4444;
+    --border-color: rgba(255, 255, 255, 0.1);
+}
+
 body {
-
-    background-color: #0f172a;
-
-    font-family: Arial;
-
+    background: radial-gradient(circle at top left, #1e293b, var(--bg-dark));
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     margin: 0;
-
-    padding: 10px;
-
-    color: white;
+    padding: 20px;
+    color: #f1f5f9;
+    min-height: 100vh;
 }
 
 header {
-
-    text-align: center;
-
-    margin-bottom: 20px;
+    text-align: left;
+    margin-bottom: 30px;
+    border-left: 4px solid var(--accent-blue);
+    padding-left: 20px;
 }
 
+header h1 {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 0;
+}
 
-/* FORCE GRID LAYOUT */
-
+/* RESPONSIVE GRID */
 .dashboard-grid {
-
     display: grid;
-
-    grid-template-columns: repeat(5, 240px);
-
-    gap: 15px;
-
-    justify-content: start;
+    /* Automatically fits cards based on screen width */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
 }
 
-
-/* CARD */
-
+/* ENHANCED GLASS CARD */
 .motor-card {
-
-    background-color: #1e293b;
-
-    border-radius: 6px;
-
-    padding: 10px;
-
-    width: 240px;
-
-    box-sizing: border-box;
-
-    display: block;
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
 }
 
+.motor-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-blue);
+}
 
-/* HEADER */
-
+/* HEADER & STATUS */
 .motor-header {
-
     display: flex;
-
     justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
-
-/* STATUS */
+.motor-header h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--accent-blue);
+}
 
 .status-badge {
-
-    padding: 3px 6px;
-
-    border-radius: 4px;
-
-    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.normal {
-
-    background-color: green;
+/* GLOWING STATUS EFFECTS */
+.normal { 
+    background: rgba(16, 185, 129, 0.2); 
+    color: var(--success);
+    border: 1px solid var(--success);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
 }
 
-.warning {
-
-    background-color: orange;
+.warning { 
+    background: rgba(245, 158, 11, 0.2); 
+    color: var(--warning);
+    border: 1px solid var(--warning);
 }
 
-.critical {
-
-    background-color: red;
+.critical { 
+    background: rgba(239, 68, 68, 0.2); 
+    color: var(--critical);
+    border: 1px solid var(--critical);
+    animation: pulse-red 2s infinite;
 }
 
-
-/* GRAPH */
+/* ANIMATIONS */
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
 
 canvas {
-
-    width: 220px !important;
-
-    height: 120px !important;
+    width: 100% !important;
+    height: auto !important;
+    margin-top: 10px;
+    filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.2));
 }
