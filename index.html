@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <title>OmniTwin | Predictive Maintenance</title>
+    <script src="chart.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Check if Chart.js actually loaded
+        window.onload = function() {
+            if (typeof Chart !== 'undefined') {
+                console.log(" Chart.js is loaded and ready!");
+            } else {
+                console.error(" Chart.js is STILL missing. Check file name in WSL.");
+            }
+        };
+    </script>
+</head>
+
+<body>
+    <header>
+        <h1>OMNITWIN</h1>
+        <p>Live Physics-Informed Telemetry</p>
+    </header>
+
+    <div class="dashboard-grid" id="dashboard"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

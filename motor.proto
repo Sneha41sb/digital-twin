@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-option go_package = "./proto";
+option go_package = "github.com/Sneha41sb/digital-twin/proto";
 
 package motor;
 
-// The simulated sensor data
+
 message SensorData {
   float rpm = 1;
   float temperature = 2;
@@ -12,10 +12,11 @@ message SensorData {
   uint64 timestamp = 4;
 }
 
-// The AI's prediction or control response
+
 message Prediction {
   float time_to_failure = 1;
   string health_status = 2;
+  float expected_temp = 3; 
 }
 
 service TwinService {

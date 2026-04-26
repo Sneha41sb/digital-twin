@@ -48,6 +48,9 @@ header h1 {
     padding: 16px;
     transition: transform 0.2s ease, border-color 0.2s ease;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    min-height: 350px; 
+    display: flex;
+    flex-direction: column;
 }
 
 .motor-card:hover {
@@ -99,7 +102,7 @@ header h1 {
     animation: pulse-red 2s infinite;
 }
 
-/* ANIMATIONS */
+
 @keyframes pulse-red {
     0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
     70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
@@ -108,7 +111,22 @@ header h1 {
 
 canvas {
     width: 100% !important;
-    height: auto !important;
-    margin-top: 10px;
+    height: 250px !important; 
+    margin-top: auto;
     filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.2));
+}
+
+.dashboard-grid {
+    min-height: 500px; 
+    padding: 40px;
+}
+
+.motor-card {
+    min-width: 400px;
+    min-height: 400px !important;
+}
+
+canvas {
+    display: block !important;
+    height: 300px !important; 
 }
