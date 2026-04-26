@@ -1,4 +1,6 @@
 OmniTwin 
+
+
 OmniTwin is a high-performance Predictive Maintenance dashboard. It leverages a physics-informed Go backend and a gRPC-powered AI engine to monitor, visualize, and predict the health of industrial motors in real-time.
 
  System Architecture
@@ -27,3 +29,30 @@ Bash
 ├── style.css       # Industrial Dashboard Styling
 ├── motor.proto     # gRPC definitions for sensor data
 └── chart.min.js    # Localized Charting Library
+
+ Setup & Installation
+
+  Prerequisites
+* **Go:** 1.20+
+* **Python:** 3.9+ 
+* **Protobuf Compiler:** `protoc` (for gRPC generation)
+* **WSL2:** (Highly recommended for Windows users)
+
+  Environment Configuration
+
+ AI Inference Engine (Python)
+```bash
+# Navigate to the engine directory
+cd ai-engine
+# Create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Install dependencies
+pip install grpcio grpcio-tools numpy
+
+Running the System
+Run these in separate terminal windows:
+Start Python AI Server:
+```bash
+python server.py
+go run client.go
