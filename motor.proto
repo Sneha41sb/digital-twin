@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "./proto";
+
+package motor;
+
+// The simulated sensor data
+message SensorData {
+  float rpm = 1;
+  float temperature = 2;
+  float vibration = 3;
+  uint64 timestamp = 4;
+}
+
+// The AI's prediction or control response
+message Prediction {
+  float time_to_failure = 1;
+  string health_status = 2;
+}
+
+service TwinService {
+  rpc StreamTelemetry(stream SensorData) returns (stream Prediction);
+}
